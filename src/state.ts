@@ -95,14 +95,14 @@ export class EditorState {
   ) {}
 
   /// The current document.
-  doc!: Node
+  declare doc: Node
 
   /// The selection.
-  selection!: Selection
+  declare selection: Selection
 
   /// A set of marks to apply to the next input. Will be null when
   /// no explicit marks have been set.
-  storedMarks!: readonly Mark[] | null
+  declare storedMarks: readonly Mark[] | null
 
   /// The schema of the state's document.
   get schema(): Schema {
