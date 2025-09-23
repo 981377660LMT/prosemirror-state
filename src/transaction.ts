@@ -1,9 +1,9 @@
-import {Transform, Step} from "prosemirror-transform"
-import {Mark, MarkType, Node, Slice} from "prosemirror-model"
-import {type EditorView} from "prosemirror-view"
-import {Selection} from "./selection"
-import {Plugin, PluginKey} from "./plugin"
-import {EditorState} from "./state"
+import { Transform, Step } from 'prosemirror-transform'
+import { Mark, MarkType, Node, Slice } from 'prosemirror-model'
+import { type EditorView } from 'prosemirror-view'
+import { Selection } from './selection'
+import { Plugin, PluginKey } from './plugin'
+import { EditorState } from './state'
 
 /// Commands are functions that take a state and a an optional
 /// transaction dispatch function and...
@@ -15,9 +15,15 @@ import {EditorState} from "./state"
 ///  - return true
 ///
 /// In some cases, the editor view is passed as a third argument.
-export type Command = (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => boolean
+export type Command = (
+  state: EditorState,
+  dispatch?: (tr: Transaction) => void,
+  view?: EditorView
+) => boolean
 
-const UPDATED_SEL = 1, UPDATED_MARKS = 2, UPDATED_SCROLL = 4
+const UPDATED_SEL = 1,
+  UPDATED_MARKS = 2,
+  UPDATED_SCROLL = 4
 
 /// An editor state transaction, which can be applied to a state to
 /// create an updated state. Use
@@ -51,7 +57,7 @@ export class Transaction extends Transform {
   // this transaction.
   private updated = 0
   // Object used to store metadata properties for the transaction.
-  private meta: {[name: string]: any} = Object.create(null)
+  private meta: { [name: string]: any } = Object.create(null)
 
   /// The stored marks set by this transaction, if any.
   storedMarks: readonly Mark[] | null
@@ -64,6 +70,7 @@ export class Transaction extends Transform {
     this.storedMarks = state.storedMarks
   }
 
+  /// 避免了每次添加 Step 都重新计算选区
   /// The transaction's current selection. This defaults to the editor
   /// selection [mapped](#state.Selection.map) through the steps in the
   /// transaction, but can be overwritten with
@@ -80,7 +87,7 @@ export class Transaction extends Transform {
   /// selection that the editor gets when the transaction is applied.
   setSelection(selection: Selection): this {
     if (selection.$from.doc != this.doc)
-      throw new RangeError("Selection passed to setSelection must point at the current document")
+      throw new RangeError('Selection passed to setSelection must point at the current document')
     this.curSelection = selection
     this.curSelectionFor = this.steps.length
     this.updated = (this.updated | UPDATED_SEL) & ~UPDATED_MARKS
@@ -149,7 +156,12 @@ export class Transaction extends Transform {
   replaceSelectionWith(node: Node, inheritMarks = true): this {
     let selection = this.selection
     if (inheritMarks)
-      node = node.mark(this.storedMarks || (selection.empty ? selection.$from.marks() : (selection.$from.marksAcross(selection.$to) || Mark.none)))
+      node = node.mark(
+        this.storedMarks ||
+          (selection.empty
+            ? selection.$from.marks()
+            : selection.$from.marksAcross(selection.$to) || Mark.none)
+      )
     selection.replaceWith(this, node)
     return this
   }
@@ -184,13 +196,13 @@ export class Transaction extends Transform {
   /// Store a metadata property in this transaction, keyed either by
   /// name or by plugin.
   setMeta(key: string | Plugin | PluginKey, value: any): this {
-    this.meta[typeof key == "string" ? key : key.key] = value
+    this.meta[typeof key == 'string' ? key : key.key] = value
     return this
   }
 
   /// Retrieve a metadata property for a given name or plugin.
   getMeta(key: string | Plugin | PluginKey) {
-    return this.meta[typeof key == "string" ? key : key.key]
+    return this.meta[typeof key == 'string' ? key : key.key]
   }
 
   /// Returns true if this transaction doesn't contain any metadata,
